@@ -4,7 +4,7 @@ A nice to have, MIT-licensed tool for using Cloudflare as a dynamic DNS provider
 
 ## Usage
 
-Leveraging the `example.json`, create a file that you want to contain your own DNS A records. Run `go build -v .`, then leverage `cloudflare-sync.exe -h` for the specifics.
+Before you get started, ensure that you have a Cloudflare site (one or more, doesn't matter since it's by Zone ID) so records can be updated. Leveraging the `example.json`, create a file that you want to contain your own DNS A records. Run `go build -v .`, then leverage `cloudflare-sync.exe -h` for the specifics.
 
 ### Docker
 
