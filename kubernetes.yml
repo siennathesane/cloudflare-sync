@@ -1,0 +1,58 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cs-deployment
+  namespace: infrastructure
+  labels:
+    app: cloudflare-sync
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudflare-sync
+  template:
+    metadata:
+      labels:
+        app: cloudflare-sync
+    spec:
+      containers:
+        - name: syncer
+          image: cr.r3t.io/library/cloudflare-sync:latest
+          env:
+            - name: RECORDS_FILE_NAME
+              value: /opt/production.json
+            - name: ZONE_ID
+              value: ""
+            - name: API_TOKEN
+              value: ""
+            - name: FREQUENCY
+              value: "30"
+          volumeMounts:
+            - mountPath: /opt/production.json
+              subPath: production.json
+              name: config
+      volumes:
+        - name: config
+          configMap:
+            name: cs-config
+            items:
+              - key: production.json
+                path: production.json
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cs-config
+  namespace: infrastructure
+data:
+  production.json: |
+    [
+      {
+        "type": "A",
+        "name": "my.domain.com",
+        "proxied": true,
+        "ttl": 120,
+        "priority": 1
+      }
+    ]

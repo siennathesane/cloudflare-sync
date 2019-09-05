@@ -1,0 +1,9 @@
+[
+  {
+    "type": "A",
+    "name": "my.domain.com",
+    "proxied": true,
+    "ttl": 120,
+    "priority": 1
+  }
+]
