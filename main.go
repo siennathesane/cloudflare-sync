@@ -21,8 +21,9 @@ var (
 	internalRecords []cloudflare.DNSRecord
 	upstreamRecords []cloudflare.DNSRecord
 	zoneId          string
+	zoneName        string
 	apiToken        string
-	quit                        = make(chan struct{})
+	quit            = make(chan struct{})
 	frequency       int
 	limiter         ratelimit.Limiter
 )
@@ -57,6 +58,7 @@ func init() {
 	flag.StringVar(&filePath, "records-file-name", "production.json", "Path to the "+
 		"production.json file.")
 	flag.StringVar(&zoneId, "zone-id", "", "ID of the zone in Cloudflare.")
+	flag.StringVar(&zoneName, "zone-name", "", "Name of the zone in Cloudflare.")
 	flag.StringVar(&apiToken, "api-token", "", "Cloudflare API token.")
 	flag.IntVar(&frequency, "frequency", 30, "Frequency in seconds to update the records. Will "+
 		"respect Cloudflare's rate limit, regardless of how many records are configured.")
@@ -78,6 +80,17 @@ func main() {
 	client, err := cloudflare.NewWithAPIToken(apiToken)
 	if err != nil {
 		logger.Fatalf("cannot instantiate cloudflare client: %s", err)
+	}
+
+	if zoneId == "" && zoneName != "" {
+		zoneId, err = client.ZoneIDByName(zoneName)
+		if err != nil {
+			logger.Fatalf("error getting zoneId from zoneName: %s", err)
+		} else {
+			logger.Printf("zoneName %s resolved into zoneId: %s", zoneName, zoneId)
+		}
+	} else if zoneId != "" && zoneName != "" {
+		logger.Printf("zoneName %s will be ignored since a zoneId is setted", zoneName)
 	}
 
 	fh, err := ioutil.ReadFile(filePath)
