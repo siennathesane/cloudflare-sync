@@ -23,7 +23,6 @@ var (
 	zoneId          string
 	zoneName        string
 	apiToken        string
-	quit            = make(chan struct{})
 	frequency       int
 	limiter         ratelimit.Limiter
 )
