@@ -113,8 +113,6 @@ func main() {
 	go ipy.updateCloudflare()
 
 	logger.Println("workers booted.")
-
-	<-quit
 }
 
 func (ipy *IPify) findIPAddress() {
