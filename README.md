@@ -1,4 +1,5 @@
 ## cloudflare-sync
+[![Go Report Card](https://goreportcard.com/badge/github.com/mxplusb/cloudflare-sync)](https://goreportcard.com/report/github.com/mxplusb/cloudflare-sync)
 
 A nice to have, MIT-licensed tool for using Cloudflare as a dynamic DNS provider.
 
