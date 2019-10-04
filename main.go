@@ -114,7 +114,8 @@ func main() {
 
 	logger.Println("workers booted.")
 
-	<-quit
+	quit := make(chan struct{})
+	<- quit
 }
 
 func (ipy *IPify) findIPAddress() {
