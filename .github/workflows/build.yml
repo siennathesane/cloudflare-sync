@@ -1,0 +1,35 @@
+name: build
+on: [push, pull_request]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        go: ["1.12.x", "1.13.x"]
+
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: ${{matrix.go}}
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+
+      - name: Build
+        run: go build -v ./cmd
+      
+      - name: Static code check
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          go get -u github.com/gordonklaus/ineffassign
+          ineffassign .
+          go vet ./...
+          
+      - name: Test
+        run: |
+          go test -race ./config
+          go test -race -short ./ip
