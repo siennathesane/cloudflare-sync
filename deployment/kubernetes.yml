@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cs-deployment
-  namespace: infrastructure
+  namespace: broomfield
   labels:
     app: cloudflare-sync
 spec:
@@ -23,9 +23,9 @@ spec:
             - name: RECORDS_FILE_NAME
               value: /opt/production.json
             - name: ZONE_ID
-              value: ""
+              value: "1e0dc3689be892462939bf419b0ba58d"
             - name: API_TOKEN
-              value: ""
+              value: "PTMLsDx8RJ3Ddmo6tUApKOH8CeiZ19KJfS0xIn47"
             - name: FREQUENCY
               value: "30"
           volumeMounts:
@@ -44,14 +44,49 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: cs-config
-  namespace: infrastructure
+  namespace: broomfield
 data:
   production.json: |
     [
       {
         "type": "A",
-        "name": "my.domain.com",
+        "name": "r3t.io",
         "proxied": true,
+        "ttl": 120,
+        "priority": 1
+      },
+      {
+        "type": "A",
+        "name": "cr.r3t.io",
+        "proxied": false,
+        "ttl": 120,
+        "priority": 1
+      },
+      {
+        "type": "A",
+        "name": "blog.r3t.io",
+        "proxied": true,
+        "ttl": 120,
+        "priority": 1
+      },
+      {
+        "type": "A",
+        "name": "vpn.r3t.io",
+        "proxied": false,
+        "ttl": 120,
+        "priority": 1
+      },
+      {
+        "type": "A",
+        "name": "ci.r3t.io",
+        "proxied": true,
+        "ttl": 120,
+        "priority": 1
+      },
+      {
+        "type": "A",
+        "name": "airport.r3t.io",
+        "proxied": false,
         "ttl": 120,
         "priority": 1
       }

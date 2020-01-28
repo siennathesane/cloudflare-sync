@@ -1,0 +1,15 @@
+{
+  "zone_id": "",
+  "zone_name": "",
+  "api_token": "",
+  "frequency": "",
+  "records": [
+    {
+      "type": "A",
+      "name": "my.domain.com",
+      "proxied": true,
+      "ttl": 120,
+      "priority": 1
+    }
+  ]
+}

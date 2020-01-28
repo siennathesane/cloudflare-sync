@@ -113,5 +113,5 @@ tags
 # Dependency directories (remove the comment below to include it)
 vendor/
 
-cloudflare-sync.exe
-production.json
+**/cloudflare-sync.exe
+**/production*.json
