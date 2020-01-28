@@ -81,6 +81,7 @@ func run() {
 	go func() {
 		for _ = range c {
 			ipm.Die()
+			log.Println("all done.")
 			os.Exit(0)
 		}
 	}()
