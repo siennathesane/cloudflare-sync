@@ -9,6 +9,10 @@ Before you get started, ensure that you have a Cloudflare site (one or more, doe
 
 Currently this is undergoing an overhaul, so please feel to provide some feedback on its changes.
 
+### Configuration
+
+The configuration is file-based, you can find an example of the schema in `config/example.json`. You need to pass this file via a flag, which you can find with `cloudflare-sync.exe --help`. This file is a subset of the Cloudflare API, so if you don't want it to override the values you already have in Cloudflare, just make sure they match. Please feel free to update this configuration section with more commentary if my explanation isn't satisfactory.
+
 ### Docker
 
 There is a Dockerfile you can use to push to your own registry, if you want. You can also leverage my pre-built one at `cr.r3t.io/library/cloudflare-sync:latest` if you want. Here is a template command you'll want:
