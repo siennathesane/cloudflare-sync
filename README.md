@@ -3,6 +3,14 @@
 
 A nice to have, MIT-licensed tool for using Cloudflare as a dynamic DNS provider.
 
+### Project Status (1 Sept 2021)
+
+This project was originally archived because I didn't have the time or desire to develop in my personal life for a long time, and I didn't want to lead folks on that I would support this. I've decided to unarchive this project because lots of people have shown interest in it through more stars. I'll work on getting some CI and other things put into place so it's easier to accept changes in the coming weeks and months. This is a useful tool and I do like that folks are interested in using it more.
+
+Maybe in time it can support more than just Cloudflare, but for now, I want to make sure that integration is rock solid for lots of different DNS record types.
+
+If you want to help maintain this, let me know, I'm definitely open to involving others, even though it's a very small, very basic program. 🙂
+
 ## Usage
 
 Before you get started, ensure that you have a Cloudflare site (one or more, doesn't matter since it's by Zone ID) so records can be updated. Leveraging the `config/example.json`, create a file that you want to contain your own DNS A records. Run `go build -v ./cmd -o cloudflare-sync.exe`, then leverage `cloudflare-sync.exe -h` for the specifics.
@@ -15,7 +23,7 @@ The configuration is file-based, you can find an example of the schema in `confi
 
 ### Docker
 
-There is a Dockerfile you can use to push to your own registry, if you want. You can also leverage my pre-built one at `cr.r3t.io/library/cloudflare-sync:latest` if you want. Here is a template command you'll want:
+There is a Dockerfile you can use to push to your own registry, if you want. Here is a template command you'll want:
 
 ```bash
 docker run \
@@ -24,7 +32,7 @@ docker run \
     -e "ZONE_ID=''" \
     -e "FREQUENCY=30" \
     -e "RECORDS_FILE_NAME=production.json" \
-    cr.r3t.io/library/cloudflare-sync
+    <your-image>
 ```
 
 Don't forget to pass in your own `production.json` file via docker volumes.
