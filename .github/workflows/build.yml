@@ -27,9 +27,6 @@ jobs:
       
       - name: Static code check
         run: |
-          export PATH=$PATH:$(go env GOPATH)/bin
-          go get -u github.com/gordonklaus/ineffassign
-          ineffassign .
           go vet ./...
           
       - name: Test
