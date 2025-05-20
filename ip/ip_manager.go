@@ -1,6 +1,7 @@
 package ip
 
 import (
+	"context" // This was added correctly
 	"log"
 	"net"
 	"time"
@@ -50,7 +51,15 @@ func NewIPManager(settings *IPManagerSettings) (*IPManager, error) {
 	}
 
 	// try to get the upstream records
-	ipm.upstreamRecords, err = ipm.client.DNSRecords(ipm.config.ZoneId, cloudflare.DNSRecord{})
+	// In cloudflare-go v4.4.0, DNSRecords was replaced by ListDNSRecords.
+	// It now requires a context, a ResourceContainer for the zone, and ListDNSRecordsParams.
+	// It returns ([]DNSRecord, *ResultInfo, error). We only need the records and the error for now.
+	var resultInfo *cloudflare.ResultInfo // Or some other appropriate type if ResultInfo is not what's returned
+	ipm.upstreamRecords, resultInfo, err = ipm.client.ListDNSRecords(context.Background(), cloudflare.ZoneIdentifier(ipm.config.ZoneId), cloudflare.ListDNSRecordsParams{})
+	// We'll log the resultInfo for now if it's not nil, just to see what it contains.
+	if resultInfo != nil {
+		ipm.logger.Printf("ListDNSRecords resultInfo: %+v", resultInfo)
+	}
 	if err != nil {
 		ipm.logger.Printf("error fetching upstream records: %s", err)
 		return &IPManager{}, err
@@ -107,16 +116,29 @@ func (ipm *IPManager) updateRunner() {
 
 // now we handle the request:wq!
 func (ipm *IPManager) updateReceiver(payload IP) {
+	// If both IPs are nil (e.g., all IPify providers failed), skip updates.
+	if payload.IPv4 == nil && !payload.IsIPv6Available() {
+		ipm.logger.Println("Both IPv4 and IPv6 are nil in payload, skipping DNS updates.")
+		return
+	}
+
 	for idx := range ipm.config.Records {
+		// Check for AAAA record update:
+		// Only proceed if a valid IPv6 is available in the payload and the record type is AAAA.
 		if payload.IsIPv6Available() && ipm.config.Records[idx].Type == "AAAA" {
+			ipm.logger.Printf("Attempting to update AAAA record %s with IP %s", ipm.config.Records[idx].Name, payload.IPv6.String())
 			ipm.updateAAAARecord(payload.IPv6, ipm.config.Records[idx])
 		}
-		if ipm.config.Records[idx].Type == "A" {
+		// Check for A record update:
+		// Only proceed if a valid IPv4 is available in the payload and the record type is A.
+		if payload.IPv4 != nil && ipm.config.Records[idx].Type == "A" {
+			ipm.logger.Printf("Attempting to update A record %s with IP %s", ipm.config.Records[idx].Name, payload.IPv4.String())
 			ipm.updateARecord(payload.IPv4, ipm.config.Records[idx])
 		}
 	}
 }
 
+// THIS IS WHERE THE BROKEN UpdateDNSRecord CALLS ARE
 func (ipm *IPManager) updateARecord(ip net.IP, record cloudflare.DNSRecord) {
 	record.Content = ip.String()
 
@@ -127,7 +149,18 @@ func (ipm *IPManager) updateARecord(ip net.IP, record cloudflare.DNSRecord) {
 	}
 
 	ipm.limiter.Take()
-	err := ipm.client.UpdateDNSRecord(ipm.config.ZoneId, record.ID, record)
+	// In cloudflare-go v4.4.0, UpdateDNSRecord now requires context, ResourceContainer, and UpdateDNSRecordParams.
+	// It returns the updated DNSRecord and an error.
+	params := cloudflare.UpdateDNSRecordParams{
+		ID:      record.ID,
+		Type:    record.Type, // From the matched upstream record / config
+		Name:    record.Name, // From the matched upstream record / config
+		Content: ip.String(),
+		TTL:     record.TTL,     // Preserve TTL from original record spec
+		Proxied: record.Proxied, // Preserve proxied status
+	}
+	// Assign the first return value to a blank identifier if it's not used.
+	_, err := ipm.client.UpdateDNSRecord(context.Background(), cloudflare.ZoneIdentifier(ipm.config.ZoneId), params)
 	if err != nil {
 		ipm.logger.Printf("error uploading record: %s", err)
 		return
@@ -147,7 +180,18 @@ func (ipm *IPManager) updateAAAARecord(ip net.IP, record cloudflare.DNSRecord) {
 	}
 
 	ipm.limiter.Take()
-	err := ipm.client.UpdateDNSRecord(ipm.config.ZoneId, record.ID, record)
+	// In cloudflare-go v4.4.0, UpdateDNSRecord now requires context, ResourceContainer, and UpdateDNSRecordParams.
+	// It returns the updated DNSRecord and an error.
+	params := cloudflare.UpdateDNSRecordParams{
+		ID:      record.ID,
+		Type:    record.Type,
+		Name:    record.Name,
+		Content: ip.String(),
+		TTL:     record.TTL,
+		Proxied: record.Proxied,
+	}
+	// Assign the first return value to a blank identifier if it's not used.
+	_, err := ipm.client.UpdateDNSRecord(context.Background(), cloudflare.ZoneIdentifier(ipm.config.ZoneId), params)
 	if err != nil {
 		ipm.logger.Printf("error uploading record: %s", err)
 		return

@@ -12,5 +12,5 @@ type IP struct {
 
 // https://stackoverflow.com/a/48519490/4949938
 func (i *IP) IsIPv6Available() bool {
-	return i.IPv6.To4() != nil
+	return i.IPv6 != nil && i.IPv6.To4() == nil && len(i.IPv6) == net.IPv6len
 }
